@@ -2389,7 +2389,8 @@ local function padPressedBody(self, joystick, button)
   -- exactly like keyboard hotkey 3.  This gives AYN Thor a dependable way to
   -- enter Dramatic Shape without a keyboard and keeps registered-item saves
   -- faithful to the cartridge.
-  if (button == "back" or button == "select") and not top and self.world then
+  if (button == "back" or button == "select")
+      and (not top or top == self.world) and self.world then
     local registered = self.world.registeredItemId
       and self.world:registeredItemId() or nil
     if not registered and self:pipelineHotkey("3", self.options, function()

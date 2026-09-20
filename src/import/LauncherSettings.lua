@@ -556,6 +556,37 @@ end
 -- is live on the next boot the same way a Gen 1 edit is.  Ladders mirror
 -- src/ui/gen2/OptionsMenu.lua's ROWS; when editing one, keep the two in sync.
 local GEN2_KEY = "gold"
+local GEN3_KEY = "firered"
+
+local function gen3Rows(opts, hooks, shared)
+  local rows = {}
+  local function add(label, value, step)
+    rows[#rows + 1] = { label = label, value = value, step = step }
+  end
+
+  -- FireRed stores the cartridge enum (0=SLOW, 1=MID, 2=FAST) in a dedicated
+  -- block. Gen I's 1/3/5 delays made the launcher say FAST while Oak and the
+  -- field printers actually received MID.
+  add(Strings("TEXT SPEED"), ladder(opts, "textSpeed",
+    { { 2, "FAST" }, { 1, "MEDIUM" }, { 0, "SLOW" } }, 1))
+  add(Strings("BATTLE ANIMATION"), ladder(opts, "battleScene",
+    { { 0, "ON" }, { 1, "OFF" } }, 0))
+  add(Strings("BATTLE STYLE"), ladder(opts, "battleStyle",
+    { { 0, "SHIFT" }, { 1, "SET" } }, 0))
+  add(Strings("SOUND"), ladder(opts, "sound",
+    { { 0, "MONO" }, { 1, "STEREO" } }, 0))
+  add(Strings("BUTTON MODE"), ladder(opts, "buttonMode",
+    { { 0, "HELP" }, { 1, "LR" }, { 2, "L=A" } }, 0))
+  add(Strings("FRAME"),
+    function() return tostring((tonumber(opts.frameType) or 0) + 1) end,
+    function(dir)
+      opts.frameType = wrapIndex((tonumber(opts.frameType) or 0)
+        + (dir or 1), 10)
+      return true
+    end)
+  addTouchRows(rows, add, shared, hooks)
+  return rows
+end
 
 local function gen2Rows(opts, hooks, shared)
   local rows = {}
@@ -749,8 +780,9 @@ function LauncherSettings.open(hooks, version)
   local opts = SaveData.loadOptions()
   local sections
   local GameVersion = require("src.core.GameVersion")
-  if GameVersion.VERSIONS[version]
-      and GameVersion.generation(version) == 2 then
+  local generation = GameVersion.VERSIONS[version]
+      and GameVersion.generation(version) or 1
+  if generation == 2 then
     local block = opts[GEN2_KEY]
     if type(block) ~= "table" then
       block = {}
@@ -758,6 +790,24 @@ function LauncherSettings.open(hooks, version)
     end
     sections = {
       { title = Strings("OPTIONS"), rows = gen2Rows(block, hooks, opts) },
+    }
+  elseif generation == 3 then
+    local block = opts[GEN3_KEY]
+    if type(block) ~= "table" then
+      block = {}
+      opts[GEN3_KEY] = block
+    end
+    -- 0.2.71 displayed the shared Gen I row while FireRed read this block.
+    -- Carry that one user-visible choice across exactly once so an existing
+    -- FAST selection becomes FireRed FAST instead of silently staying MID.
+    if block._launcherSchema ~= 1 then
+      local legacy = tonumber(opts.textSpeed)
+      block.textSpeed = ({ [1] = 2, [3] = 1, [5] = 0 })[legacy]
+        or block.textSpeed or 1
+      block._launcherSchema = 1
+    end
+    sections = {
+      { title = Strings("OPTIONS"), rows = gen3Rows(block, hooks, opts) },
     }
   else
     sections = {

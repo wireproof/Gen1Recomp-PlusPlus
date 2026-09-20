@@ -428,6 +428,57 @@ function Naming.isOpen()
   return Naming.openFlag
 end
 
+-- Generation-neutral companion-screen seam. Keep the private FRLG keyboard
+-- geometry here so UI mods do not have to copy PAGES or poke local helpers.
+function Naming.gearSnapshot()
+  local st = Naming.openFlag and Naming._state
+  if not st then return nil end
+  local page = pageInfo(st)
+  local grid = {}
+  for r, cells in ipairs(page and page.rows or {}) do
+    grid[r] = {}
+    for c, label in ipairs(cells) do grid[r][c] = label end
+  end
+  grid[#grid + 1] = { page and page.label or "PAGE", "BACK", "OK" }
+  local row, col = st.row, st.col
+  if onButtonCol(st) then row, col = #grid, st.btn end
+  return { title = st.title, name = st.name, grid = grid,
+    row = row, col = col, page = st.page }
+end
+
+function Naming.gearSelect(row, col)
+  local st = Naming.openFlag and Naming._state
+  if not st or st.finished then return false end
+  row, col = tonumber(row), tonumber(col)
+  if not row or not col then return false end
+  if row >= 1 and row <= 4 then
+    local page = pageInfo(st)
+    local cells = page and page.rows[row]
+    if not (cells and cells[col]) then return false end
+    st.row, st.col = row, col
+    playSe(5)
+    appendChar(st, cells[col])
+    return true
+  end
+  if row == 5 then
+    st.btn = math.max(1, math.min(3, col))
+    st.row = ({ 1, 2, 4 })[st.btn]
+    st.col = colCount(st) + 1
+    local role = SIDE[st.btn]
+    if role == "PAGE" then
+      cyclePage(st)
+    elseif role == "BACK" then
+      playSe(23)
+      backspace(st)
+    else
+      playSe(5)
+      Naming.close(confirm(st))
+    end
+    return true
+  end
+  return false
+end
+
 function Naming.close(result)
   local st = Naming._state
   if st and st.hold then

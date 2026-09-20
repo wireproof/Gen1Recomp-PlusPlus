@@ -1596,6 +1596,10 @@ function love.run()
       love.graphics.origin()
       love.graphics.clear(love.graphics.getBackgroundColor())
       if love.draw then love.draw() end
+      -- The final presentation target is always the window. A mod output hook
+      -- that accidentally restores an off-screen Canvas otherwise makes LÖVE
+      -- abort here with "present cannot be called while a Canvas is active".
+      love.graphics.setCanvas()
       PresentSync.waitBeforePresent()
       love.graphics.present()
       PresentSync.notePresent()

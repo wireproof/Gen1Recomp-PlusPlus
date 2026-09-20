@@ -104,6 +104,20 @@ eq(red.opts.touchControls.enabled, false, "writing to the flat key")
 eq(red.opts.gold, nil, "with no gold block invented")
 eq(findRow(red, "TOUCH PAD").value() ~= nil, true, "and reading it back")
 
+-- FireRed owns cartridge-shaped options in its dedicated block. In
+-- particular, FAST is enum 2; using the Gen I delay value made the launcher
+-- say FAST while the Oak/field printers continued at another speed.
+local fireRed = LauncherSettings.open(hooks, "firered")
+local fireRedSpeed = findRow(fireRed, "TEXT SPEED")
+local gen1TextSpeed = fireRed.opts.textSpeed
+fireRed.opts.firered.textSpeed = 0
+eq(fireRedSpeed.value(), "SLOW", "FireRed reads its own cartridge default")
+fireRedSpeed.step(1)
+eq(fireRed.opts.firered.textSpeed, 2, "FireRed FAST stores enum 2")
+eq(fireRedSpeed.value(), "FAST", "FireRed FAST reads back from its own block")
+eq(fireRed.opts.textSpeed, gen1TextSpeed,
+  "FireRed does not overwrite Gen I text speed")
+
 -- With no hook (the standalone save editor's shape) the editor row is gone
 -- rather than dead, on both sides.
 eq(has(LauncherSettings.open(nil, "gold"), "TOUCH CONTROLS"), false,

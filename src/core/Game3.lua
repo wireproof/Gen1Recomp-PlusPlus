@@ -350,7 +350,10 @@ function Game3:_handleRegisteredItem()
   end
   local session = self.session
   local item = session and session.registeredItem
-  if not item then return end
+  if not item then
+    self:_hotkey("3")
+    return
+  end
   local Runtime = package.loaded["src.core.game3.runtime"]
   if Runtime and Runtime.uiBusy and Runtime.uiBusy() then return end
   local Field = package.loaded["src.core.game3.field"]
@@ -724,10 +727,9 @@ function Game3:_padPressedBody(joystick, button)
     local ok, down = pcall(function() return joystick:isGamepadDown("back") end)
     selectHeld = ok and down == true
   end
-  -- Physical shoulders are real GBA L/R buttons in FRLG; only the separate
-  -- trigger controls are consumed as speed hotkeys in this runtime.
-  local isTrigger = button == "lefttrigger" or button == "righttrigger"
-  if not selectHeld and isTrigger and Input2.padAction then
+  -- AYN Thor firmware may report its labelled triggers as shoulders or axes.
+  -- Keep the same speed actions the Gen I/II owners expose for either form.
+  if not selectHeld and Input2.padAction then
     local action = Input2:padAction(button)
     if action == "speedUp" then
       self:_cycleSpeed(1)
@@ -836,14 +838,44 @@ function Game3:filedropped() end
 
 function Game3:touchpressed(id, x, y, dx, dy, pressure)
   if self.touchControls and self.touchControls:touchpressed(id, x, y) then return end
+  if not ModRuntime.wantsHook("input.pointer") then return end
+  self.modPointers = self.modPointers or {}
+  self.modPointers[id] = { source = "touch", x = x, y = y,
+                           pressure = pressure }
+  ModRuntime.call("input.pointer", function() return false end, self, {
+    phase = "pressed", source = "touch", id = id, x = x, y = y,
+    gameX = x, gameY = y, insideGame = true,
+    dx = dx or 0, dy = dy or 0, pressure = pressure,
+  })
 end
 
 function Game3:touchmoved(id, x, y, dx, dy, pressure)
   if self.touchControls then self.touchControls:touchmoved(id, x, y) end
+  local p = self.modPointers and self.modPointers[id]
+  if not p then return end
+  dx, dy = dx or (x - p.x), dy or (y - p.y)
+  p.x, p.y, p.pressure = x, y, pressure
+  if ModRuntime.wantsHook("input.pointer") then
+    ModRuntime.call("input.pointer", function() return false end, self, {
+      phase = "moved", source = p.source, id = id, x = x, y = y,
+      gameX = x, gameY = y, insideGame = true,
+      dx = dx, dy = dy, pressure = pressure,
+    })
+  end
 end
 
 function Game3:touchreleased(id, x, y, dx, dy, pressure)
   if self.touchControls then self.touchControls:touchreleased(id, x, y) end
+  local p = self.modPointers and self.modPointers[id]
+  if not p then return end
+  self.modPointers[id] = nil
+  if ModRuntime.wantsHook("input.pointer") then
+    ModRuntime.call("input.pointer", function() return false end, self, {
+      phase = "released", source = p.source, id = id, x = x, y = y,
+      gameX = x, gameY = y, insideGame = true,
+      dx = dx or 0, dy = dy or 0, pressure = pressure,
+    })
+  end
 end
 
 function Game3:gamepadaxis(joystick, axis, value)

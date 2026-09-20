@@ -23,6 +23,12 @@ local function subject(registered)
   return game, calls, function() return persisted end
 end
 
+local function subjectWithWorldOnTop(registered)
+  local game, calls, persisted = subject(registered)
+  game.stack.top = function() return game.world end
+  return game, calls, persisted
+end
+
 local joy = {
   isGamepad = function() return true end,
   isGamepadDown = function() return false end,
@@ -34,6 +40,12 @@ game:gamepadpressed(joy, "back")
 eq(calls[1], "3", "bare Select uses Dramatic Shape pipeline hotkey")
 eq(persisted(), 1, "pipeline selection persists")
 eq(game.save.options, game.options, "pipeline options attach to save")
+
+Input:init()
+game, calls, persisted = subjectWithWorldOnTop(nil)
+game:gamepadpressed(joy, "back")
+eq(calls[1], "3", "bare Select also works when World is the live top state")
+eq(persisted(), 1, "live-world pipeline selection persists")
 
 Input:init()
 game, calls = subject("BICYCLE")
