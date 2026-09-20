@@ -90,6 +90,12 @@ fi
 # Materialize the listing once. Piping unzip→grep -q under `set -o pipefail`
 # SIGPIPEs unzip when grep exits early on a match and aborts the build.
 unzip -Z1 "$OUTPUT" > "$LISTING"
+zero_files="$(zipinfo -l "$OUTPUT" \
+  | awk '$1 ~ /^-/ && $4 == 0 { print $NF }')"
+if [ -n "$zero_files" ]; then
+  printf '%s\n' "$zero_files" >&2
+  fail "game.love contains zero-byte files (materialize cloud placeholders and retry)"
+fi
 if grep -Eq '^(data|assets)/generated/[^/]+|^(data|assets)/generated/.+/' "$LISTING"; then
   fail "game.love unexpectedly contains generated ROM data"
 fi

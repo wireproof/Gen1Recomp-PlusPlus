@@ -108,6 +108,19 @@ love.graphics.draw = originalDraw
 eq(fitted[3], fitted[4], "portrait custom art is never stretched")
 check(fitted[1] > 0 and fitted[2] == 0, "portrait art is centered with side gutters")
 
+-- A cloud-placeholder or damaged stock label used to fall through to an
+-- optional default file and crash the entire launcher when that was absent.
+local realNewImage = love.graphics.newImage
+love.graphics.newImage = function(path)
+  if path == "assets/labels/gba-green-blue.png" then
+    error("missing optional default label")
+  end
+  return realNewImage(path)
+end
+local fallback = Art.label({}, { cacheKey = "missing", color = { 10, 20, 30 } }, nil)
+love.graphics.newImage = realNewImage
+check(fallback and fallback.image, "missing GBA label draws a generated fallback")
+
 shape = nil
 local normal = Importer.new(noop, { launcher = true })
 eq(normal.cartShape, nil, "ordinary launches keep the original cart")

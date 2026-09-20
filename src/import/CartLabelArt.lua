@@ -42,12 +42,19 @@ function Art.label(imp, skin, original)
   if imp._gbaLabels[skin.cacheKey] then return imp._gbaLabels[skin.cacheKey] end
   local source = externalLabel(imp) or original
   if not source then
-    if not imp._gbaDefaultLabel then
-      local image = love.graphics.newImage("assets/labels/gba-green-blue.png")
-      local w, h = image:getDimensions()
-      imp._gbaDefaultLabel = { image = image, width = w, height = h }
+    if imp._gbaDefaultLabel == nil then
+      imp._gbaDefaultLabel = false
+      local ok, image = pcall(love.graphics.newImage,
+        "assets/labels/gba-green-blue.png")
+      if ok and image then
+        local sized, w, h = pcall(image.getDimensions, image)
+        if sized and type(w) == "number" and type(h) == "number"
+            and w > 0 and h > 0 then
+          imp._gbaDefaultLabel = { image = image, width = w, height = h }
+        end
+      end
     end
-    source = imp._gbaDefaultLabel
+    source = imp._gbaDefaultLabel or nil
   end
   local label = canvas(512, 260, function(g)
     local c = skin.color
@@ -56,10 +63,19 @@ function Art.label(imp, skin, original)
       g.setColor(c[1] / 255 * shade, c[2] / 255 * shade, c[3] / 255 * shade, 1)
       g.rectangle("fill", 0, y, 512, 1)
     end
-    local scale = math.min(512 / source.width, 260 / source.height)
-    g.setColor(1, 1, 1, 1)
-    g.draw(source.image, (512 - source.width * scale) / 2,
-      (260 - source.height * scale) / 2, 0, scale, scale)
+    if source then
+      local scale = math.min(512 / source.width, 260 / source.height)
+      g.setColor(1, 1, 1, 1)
+      g.draw(source.image, (512 - source.width * scale) / 2,
+        (260 - source.height * scale) / 2, 0, scale, scale)
+    else
+      -- A missing or unreadable optional label must never take down the
+      -- launcher. Draw a neutral inset so the cartridge remains usable.
+      g.setColor(1, 1, 1, 0.16)
+      g.rectangle("fill", 20, 18, 472, 224)
+      g.setColor(0, 0, 0, 0.18)
+      g.rectangle("line", 20, 18, 472, 224)
+    end
   end)
   imp._gbaLabels[skin.cacheKey] = label
   return label
