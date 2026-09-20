@@ -6,6 +6,7 @@ local T = require("tests.harness")
 local eq = T.eq
 local Game2 = require("src.core.Game2")
 local Input = require("src.core.Input")
+local Player = require("src.world.gen2.Player")
 
 local function subject(registered)
   local calls, persisted = {}, 0
@@ -51,5 +52,18 @@ Input:init()
 game, calls = subject("BICYCLE")
 game:gamepadpressed(joy, "back")
 eq(#calls, 0, "registered item retains Select")
+
+local player = Player.new(3, 4, "left")
+player.sprite = { marker = "gen2-player" }
+player.spriteYOffset = -2
+player.stepFlip = true
+local sprite, x, y, facing, phase, flip, hopping = player:pose()
+eq(sprite, player.sprite, "Gen II player exposes its sprite to world pipelines")
+eq(x, 48, "Gen II player pose reports pixel x")
+eq(y, 62, "Gen II player pose applies the sprite y offset")
+eq(facing, "left", "Gen II player pose reports facing")
+eq(phase, 0, "idle Gen II player pose reports the standing phase")
+eq(flip, true, "Gen II player pose reports its walking flip")
+eq(hopping, false, "Gen II player pose has no Gen I hop flag")
 
 T.finish()

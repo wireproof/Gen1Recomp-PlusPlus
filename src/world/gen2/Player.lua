@@ -216,6 +216,15 @@ function Player:drawFlip()
   return self.stepFlip ~= mirrored
 end
 
+-- Shared world pipelines consume players and NPCs through the same pose
+-- contract.  Gen II originally drew the player directly and therefore never
+-- exposed it; Dramatic Shape's native Gen II renderer legitimately treats the
+-- player as another scene entity.
+function Player:pose()
+  return self.sprite, self.px, self.py + (self.spriteYOffset or 0),
+         self.facing, self:walkPhase(), self:drawFlip(), false
+end
+
 function Player:update()
   if self.turnTimer > 0 then
     self.turnTimer = self.turnTimer - 1
