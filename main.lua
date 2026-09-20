@@ -736,6 +736,27 @@ function love.load(args)
     return
   end
 
+  -- A private package can carry its owner's verified FireRed backup at this
+  -- path.  Public builds never contain it.  Import it on the first launch and
+  -- boot FireRed directly thereafter; an explicit launcher deep-link still
+  -- reaches the normal multi-game launcher.
+  local bundledFireRed = "private/firered.gba"
+  if not resolvedLaunch.launcher and love.filesystem.getInfo(bundledFireRed) then
+    if RomImporter.isReady("firered") then
+      bootGame("firered")
+      return
+    end
+    local okBundled, bundledData = pcall(love.filesystem.read, bundledFireRed)
+    if okBundled and type(bundledData) == "string" then
+      Importer = RomImporter.new(function(version)
+        Importer = nil
+        bootGame(version or "firered")
+      end)
+      Importer:startData(bundledData, "Bundled Pokemon FireRed")
+      return
+    end
+  end
+
   -- The launcher draws before any game boots, so the mod loader has not run
   -- and Strings has no catalog.  Routing the launcher's text through Strings
   -- (#767) only pays off if something fills that catalog this early, and no
