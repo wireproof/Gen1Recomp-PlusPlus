@@ -164,6 +164,8 @@ for i, p in ipairs(pushes) do
   table.insert(ow.entities, npc)
   local ok = ow:boulderIntoHole(npc)
   check(ok, ("push %d: boulderIntoHole(%s) returns true"):format(i, p.srcName))
+  eq(Game.stack:top(), ow,
+     ("push %d: boulder drop shows no extra message (#2290)"):format(i))
   check(Game.save.flags[p.event] == true,
         ("push %d: %s is set"):format(i, p.event))
   check(not OW.objectVisible(Game.save, p.srcMap, objOf(p.srcMap, p.srcName)),

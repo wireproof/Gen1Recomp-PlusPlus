@@ -128,7 +128,7 @@ do
 end
 
 -- locked turns: .BideCheck decrements with no text of its own in pokered and
--- no animation either; the port prints the storing line, and that is all
+-- no animation either
 do
   local tb = freshBattle()
   tb.player.bideTurns = 3
@@ -136,7 +136,8 @@ do
   tb:continueBide(tb.player, tb.enemy)
   local rows = trace(tb)
   eq(tb.player.bideTurns, 2, "a locked turn just counts down")
-  check(indexOfText(rows, "storing energy!") ~= nil, "and reprints the line")
+  check(indexOfText(rows, "storing energy!") == nil,
+        "and does not repeat the storing-energy line (#2338)")
   for _, r in ipairs(rows) do
     check(r.anim == nil, "no animation on a locked turn: " .. tostring(r.anim))
   end

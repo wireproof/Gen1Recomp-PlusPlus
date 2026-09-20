@@ -4452,7 +4452,6 @@ end
 function BattleState:continueBide(user, target)
   user.bideTurns = user.bideTurns - 1
   if user.bideTurns > 0 then
-    self:sayNext(Strings("%s\nis storing energy!", displayName(user)))
     return
   end
   self:sayNext(self:romText("_UnleashedEnergyText", "%s\nunleashed energy!", displayName(user)))

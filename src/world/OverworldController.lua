@@ -4999,7 +4999,6 @@ function OverworldState:boulderIntoHole(npc)
       for i = #self.entities, 1, -1 do
         if self.entities[i] == npc then table.remove(self.entities, i) end
       end
-      Game.stack:push(TextBox.new(Game, Strings("The boulder fell\nthrough the hole!")))
       return true
     end
   end
