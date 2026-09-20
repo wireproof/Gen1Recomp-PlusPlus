@@ -21,7 +21,7 @@ return function(game)
   assert(loaded.DRAMATIC_SHAPE, "Dramatic Shape did not load")
 
   local dramatic = game.mods.exports and game.mods.exports.DRAMATIC_SHAPE
-  assert(dramatic and dramatic.version == "1.8.0-multigen.2",
+  assert(dramatic and dramatic.version == "1.8.0-multigen.3",
     "Dramatic Shape exports are unavailable")
 
   print(("[seven-game-smoke] PASS %s gear=%s dramatic=%s"):format(
