@@ -2416,6 +2416,17 @@ local function padPressedBody(self, joystick, button)
   if selectHeld then
     local digit = GamepadMap.displayChordDigit(button)
     if digit then
+      -- Dramatic Shape claims display key 3 as its voxel camera ladder.  The
+      -- normal keyboard path deliberately gives the engine's legacy TILT key
+      -- first refusal, but SELECT+B is the mod's documented controller route
+      -- and must offer the registered pipeline first.  With no eligible
+      -- pipeline it still falls back to key 3/TILT exactly as before.
+      if digit == "3" and self:pipelineHotkey("3", self.options, function()
+        if self.save then self.save.options = self.options end
+        self:persistOptions()
+      end) then
+        return
+      end
       self:keypressed(digit)
       return
     end

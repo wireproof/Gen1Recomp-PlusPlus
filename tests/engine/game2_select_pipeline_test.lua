@@ -35,6 +35,11 @@ local joy = {
   isGamepadDown = function() return false end,
 }
 
+local selectJoy = {
+  isGamepad = function() return true end,
+  isGamepadDown = function(_, button) return button == "back" end,
+}
+
 Input:init()
 local game, calls, persisted = subject(nil)
 game:gamepadpressed(joy, "back")
@@ -52,6 +57,12 @@ Input:init()
 game, calls = subject("BICYCLE")
 game:gamepadpressed(joy, "back")
 eq(#calls, 0, "registered item retains Select")
+
+Input:init()
+game, calls, persisted = subjectWithWorldOnTop("BICYCLE")
+game:gamepadpressed(selectJoy, "b")
+eq(calls[1], "3", "Select+B offers key 3 to the voxel pipeline before TILT")
+eq(persisted(), 1, "Select+B voxel selection persists")
 
 local player = Player.new(3, 4, "left")
 player.sprite = { marker = "gen2-player" }
