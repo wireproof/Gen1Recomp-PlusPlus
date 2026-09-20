@@ -40,7 +40,10 @@ add_mod() {
   # test/cache debris. This staging directory is removed on exit.
   (cd "$source" && find . -type f \
     ! -path './.git/*' ! -path './.git' ! -name '.DS_Store' \
-    ! -path './.scratchpad/*' -print0) \
+    ! -path './.scratchpad/*' \
+    ! -path './mod_option_schemas.json' \
+    ! -path './options.lua' ! -path './options.lua.bak' \
+    ! -path './options.lua.tmp' -print0) \
     | (cd "$source" && tar --null -T - -cf -) \
     | (cd "$STAGE/$rel" && tar -xf -)
   added=1
