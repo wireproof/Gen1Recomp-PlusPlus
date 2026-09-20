@@ -34,8 +34,8 @@ ANDROID_DIR="$ROOT/mobile/android"
 EMBED_ASSETS="$ANDROID_DIR/app/src/embed/assets"
 LOVE_FILE="$EMBED_ASSETS/game.love"
 DIST="$ROOT/dist/android"
-APP_NAME="gen1recomp"
-APPLICATION_ID="com.theboisclub.pokemonred"
+APP_NAME="Gen3Recomped"
+APPLICATION_ID="com.wireproof.gen3recomped"
 LOVE_ANDROID_VERSION="11.5a"
 NDK_VERSION="25.2.9519653"
 ANDROID_API="36"
@@ -103,7 +103,7 @@ if $RELEASE; then
 fi
 
 if ! $RELEASE; then
-  APPLICATION_ID="com.theboisclub.pokemonred.dev"
+  APPLICATION_ID="com.wireproof.gen3recomped.dev"
   APP_NAME="$APP_NAME (dev)"
 fi
 
@@ -112,7 +112,7 @@ if [ -n "$TEST_APPLICATION_ID" ]; then
     fail "invalid --test-application-id '$TEST_APPLICATION_ID' (expected a dotted package id, e.g. com.theboisclub.pokemonred.shaderfxtest)"
   fi
   APPLICATION_ID="$TEST_APPLICATION_ID"
-  APP_NAME="gen1recomp (test)"
+  APP_NAME="Gen3Recomped (test)"
 fi
 # Optional overrides for side-by-side test APKs (never used by CI shipping builds).
 if [ -n "${GEN1RECOMP_ANDROID_APPLICATION_ID:-}" ]; then

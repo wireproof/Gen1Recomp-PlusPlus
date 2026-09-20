@@ -26,8 +26,8 @@ WORK="$HERE/work"
 DIST="$ROOT/dist"
 ENTITLEMENTS="$ROOT/scripts/macos-entitlements.plist"
 
-APP_NAME="gen1recomp"
-BUNDLE_ID="com.theboisclub.pokemonred"
+APP_NAME="Gen3Recomped"
+BUNDLE_ID="com.wireproof.gen3recomped"
 LOVE_VERSION="11.5"
 VERSION="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo dev)"
 VERSION_EXPLICIT=false
@@ -147,7 +147,7 @@ fi
 # One source of truth for every platform's launcher icon; iOS resizes the
 # same file in scripts/build_ios.sh (apply_ios_icon) and the Android res/
 # drawables are generated from it too.
-ICON_SRC="$ROOT/assets/logo/gen1recomp_cover.png"
+ICON_SRC="$ROOT/assets/logo/gen3recomped_icon.png"
 
 # pipx installs peresed (Windows exe icon patcher) here, off the default PATH.
 PATH="$PATH:$HOME/.local/bin"
@@ -251,11 +251,8 @@ build_mac() {
   # Assets.car first, so overwriting the loose .icns files alone changes
   # nothing; the compiled asset catalog has to go and the plist has to fall
   # back to CFBundleIconFile.
-  local icns="$ROOT/assets/icon.icns"
-  if [ ! -f "$icns" ]; then
-    icns="$WORK/GameIcon.icns"
-    make_icns "$icns"
-  fi
+  local icns="$WORK/GameIcon.icns"
+  make_icns "$icns"
   cp "$icns" "$out_app/Contents/Resources/GameIcon.icns"
   cp "$icns" "$out_app/Contents/Resources/OS X AppIcon.icns"
   rm -f "$out_app/Contents/Resources/Assets.car"
@@ -471,7 +468,7 @@ build_linux() {
   cat > "$appdir/$APP_NAME.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=gen1recomp
+Name=Gen3Recomped
 Comment=Pokémon Gen 1 recompilation
 Exec=$APP_NAME
 Icon=$APP_NAME

@@ -11,8 +11,11 @@ GamepadMap.DEFAULT_GAMEPAD_BINDINGS = {
 }
 
 GamepadMap.TRIGGER_AXES = {
-  triggerleft = "triggerleft", lefttrigger = "triggerleft",
-  triggerright = "triggerright", righttrigger = "triggerright",
+  -- SDL calls the axes triggerleft/triggerright, while the action map uses
+  -- lefttrigger/righttrigger.  Normalize to the action-map spelling so axis
+  -- presses on handhelds (including AYN Thor) are actually reversible.
+  triggerleft = "lefttrigger", lefttrigger = "lefttrigger",
+  triggerright = "righttrigger", righttrigger = "righttrigger",
 }
 GamepadMap.TRIGGER_ON = 0.4
 GamepadMap.TRIGGER_OFF = 0.2

@@ -39,9 +39,9 @@ RESOURCES_DIR="$XCODE_DIR/ios/resources"
 LOVE_FILE="$RESOURCES_DIR/game.love"
 LIBS_DIR="$XCODE_DIR/ios/libraries"
 
-APP_NAME="gen1recomp++"
-DISPLAY_NAME="gen1recomp++"
-PRODUCT_NAME="gen1recomp++"
+APP_NAME="Gen3Recomped"
+DISPLAY_NAME="Gen3Recomped"
+PRODUCT_NAME="Gen3Recomped"
 # Bundle ID resolution, most specific wins:
 #   1. GEN1_BUNDLE_ID env var
 #   2. mobile/ios/bundle_id.local (one line, gitignored — pins YOUR install
@@ -127,7 +127,8 @@ detect_team() {
     | sed -n 's/.*OU *= *\([A-Z0-9]*\).*/\1/p' \
     | head -1
 }
-if $DEVICE && [ -z "${DEVELOPMENT_TEAM:-}" ]; then
+if $DEVICE && [ "${GEN1_IOS_UNSIGNED:-0}" != "1" ] \
+    && [ -z "${DEVELOPMENT_TEAM:-}" ]; then
   DEVELOPMENT_TEAM="$(detect_team || true)"
   if [ -n "$DEVELOPMENT_TEAM" ]; then
     say "signing team auto-detected from keychain: $DEVELOPMENT_TEAM"
@@ -139,7 +140,7 @@ if $DEVICE && [ -z "${DEVELOPMENT_TEAM:-}" ]; then
   fi
 fi
 if [ -z "$BUNDLE_ID" ]; then
-  BUNDLE_ID="com.theboisclub.gen1recompplusplus"
+  BUNDLE_ID="com.wireproof.gen3recomped"
 fi
 
 # --------------------------------------------------------------- host checks
@@ -237,7 +238,7 @@ verify_documents_overlay() {
 }
 
 apply_ios_icon() {
-  local source="$ROOT/assets/logo/logo.png"
+  local source="$ROOT/assets/logo/gen3recomped_icon.png"
   local target="$XCODE_DIR/Images.xcassets/iOS AppIcon.appiconset"
   [ -f "$source" ] || fail "missing iOS icon source: $source"
   [ -d "$target" ] || fail "missing iOS app icon set: $target"
@@ -825,7 +826,10 @@ run_xcodebuild() {
     args+=(CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=-)
   else
     warn "device build: configure signing in Xcode or set DEVELOPMENT_TEAM / CODE_SIGN_IDENTITY"
-    if [ -n "${DEVELOPMENT_TEAM:-}" ]; then
+    if [ "${GEN1_IOS_UNSIGNED:-0}" = "1" ]; then
+      warn "building an unsigned device IPA; sign it with AltStore/Sideloadly or Xcode before installation"
+      args+=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_ENTITLEMENTS=)
+    elif [ -n "${DEVELOPMENT_TEAM:-}" ]; then
       args+=(DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"
              CODE_SIGN_STYLE=Automatic
              -allowProvisioningUpdates)

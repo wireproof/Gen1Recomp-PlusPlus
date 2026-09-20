@@ -2384,6 +2384,21 @@ local function padPressedBody(self, joystick, button)
     top:onGamepadPressed(button)
     return
   end
+  -- On Gen II, SELECT normally uses the registered item.  When no item is
+  -- registered, make the otherwise-idle button cycle the mod display pipeline
+  -- exactly like keyboard hotkey 3.  This gives AYN Thor a dependable way to
+  -- enter Dramatic Shape without a keyboard and keeps registered-item saves
+  -- faithful to the cartridge.
+  if (button == "back" or button == "select") and not top and self.world then
+    local registered = self.world.registeredItemId
+      and self.world:registeredItemId() or nil
+    if not registered and self:pipelineHotkey("3", self.options, function()
+      if self.save then self.save.options = self.options end
+      self:persistOptions()
+    end) then
+      return
+    end
+  end
   if not selectHeld then
     local action = Input:padAction(button)
     if action == "speedUp" then

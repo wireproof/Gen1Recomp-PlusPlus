@@ -94,6 +94,10 @@ end
 function Game3:load(opts)
   opts = opts or {}
   self.onExit = opts.onExit or self.onExit
+  -- A held touch-control override is transient state.  It must never survive
+  -- a soft reset / game switch and leave FireRed permanently fast-forwarding.
+  self.speedOverride = nil
+  self._skinSpeedPrev = nil
   Input:init()
   self.input = Input
   Dataset.hydrate(self)
@@ -158,6 +162,16 @@ function Game3:load(opts)
     or (rawSave and rawSave.options)
     or (SaveData.defaultOptions and SaveData.defaultOptions())
   self.options = options
+  -- 0.2.70 could persist an accelerated FireRed category while its physical
+  -- trigger could not map back to the speed-toggle action.  Recover those
+  -- installs once, then leave all later user speed choices alone.
+  if not options.fireRedSpeedRecovered071 then
+    options.speedOverworld = 1
+    options.speedBattle = 1
+    options.speedMenu = 1
+    options.fireRedSpeedRecovered071 = true
+    self:writeOptions()
+  end
   self:applyOptions(options)
 
   self:_exposeModData()

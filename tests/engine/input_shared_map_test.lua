@@ -14,6 +14,10 @@ local RomImporter = require("src.import.RomImporter")
 eq(GamepadMap.mapGamepadButton("a"), "a", "gamepad A -> GB A")
 eq(GamepadMap.mapGamepadButton("back"), "select", "gamepad back -> select")
 eq(GamepadMap.mapGamepadButton("dpup"), "up", "gamepad d-pad up")
+eq(GamepadMap.TRIGGER_AXES.triggerleft, "lefttrigger",
+  "SDL left trigger axis -> speed action name")
+eq(GamepadMap.TRIGGER_AXES.triggerright, "righttrigger",
+  "SDL right trigger axis -> speed action name")
 
 -- Generic raw indices (Linux handheld fallback).
 eq(GamepadMap.mapRawButton(1), "a", "raw #1 -> A")

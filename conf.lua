@@ -23,7 +23,7 @@ function love.conf(t)
 
   if companion then
     t.identity = "pokemon-love2d-companion"
-    t.window.title = "gen1recomp Secondary Display"
+    t.window.title = "Gen3Recomped Secondary Display"
     t.window.width = 640
     t.window.height = 576
     t.window.minwidth = 160
@@ -45,7 +45,7 @@ function love.conf(t)
     -- back to the plain title if the source is not mounted yet
     local ok, Version = pcall(require, "src.core.Version")
     t.window.title = ok and Version.title()
-      or "gen1recomp"
+      or "Gen3Recomped"
     -- Open at the launcher's design size (the split-screen ROM selector is
     -- laid out for 1024x768). The window is resizable and the 160x144 game
     -- canvas letterboxes into whatever size it ends up, so this only sets the

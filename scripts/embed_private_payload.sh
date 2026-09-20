@@ -74,6 +74,11 @@ add_rom GEN1RECOMP_BUNDLED_STADIUM_ROM baseroms/baserom.z64 \
   ed7bef5a306f88c0a6e96b15e71fee2ef32058f3
 add_mod GEN1RECOMP_BUNDLED_GEAR_MOD mods/kanto_johto_gear
 add_mod GEN1RECOMP_BUNDLED_DRAMATIC_MOD mods/DRAMATIC_SHAPE
+# Android's mounted mod filesystem cannot always see the archive-root baseroms
+# directory.  Include the same verified owner-supplied Stadium dump inside the
+# Dramatic Shape bundle as a local-build fallback.
+add_rom GEN1RECOMP_BUNDLED_STADIUM_ROM mods/DRAMATIC_SHAPE/baseroms/baserom.z64 \
+  ed7bef5a306f88c0a6e96b15e71fee2ef32058f3
 
 if [ "$added" -eq 1 ]; then
   (cd "$STAGE" && zip -q -9 -r "$ARCHIVE_ABS" .)
