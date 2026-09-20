@@ -2363,6 +2363,13 @@ function Game2:_cycleSpeed(dir)
   self:persistOptions()
 end
 
+function Game2:_toggleSpeed()
+  local GameSpeed = require("src.core.GameSpeed")
+  self.options.speed = GameSpeed.toggle(self.options.speed)
+  if self.save then self.save.options = self.options end
+  self:persistOptions()
+end
+
 local function padPressedBody(self, joystick, button)
   TouchControls:noteGamepad()
   local selectHeld = Input:isDown("select")
@@ -2384,6 +2391,9 @@ local function padPressedBody(self, joystick, button)
       return
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
+      return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
       return
     end
   end
@@ -2475,6 +2485,9 @@ function Game2:joystickpressed(joystick, button)
       return
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
+      return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
       return
     end
   end

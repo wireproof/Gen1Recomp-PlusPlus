@@ -514,6 +514,14 @@ function Game3:_cycleSpeed(dir)
   self:writeOptions()
 end
 
+function Game3:_toggleSpeed()
+  if type(self.options) ~= "table" then return end
+  local GameSpeed = require("src.core.GameSpeed")
+  local key = GameSpeed.optionKey(self:speedCategory())
+  self.options[key] = GameSpeed.toggle(self.options[key])
+  self:writeOptions()
+end
+
 function Game3:zoomGateOK()
   if self.phase ~= "field" then return false end
   local okB, Battle = pcall(require, "src.core.game3.battle")
@@ -702,6 +710,8 @@ function Game3:_padPressedBody(joystick, button)
     local ok, down = pcall(function() return joystick:isGamepadDown("back") end)
     selectHeld = ok and down == true
   end
+  -- Physical shoulders are real GBA L/R buttons in FRLG; only the separate
+  -- trigger controls are consumed as speed hotkeys in this runtime.
   local isTrigger = button == "lefttrigger" or button == "righttrigger"
   if not selectHeld and isTrigger and Input2.padAction then
     local action = Input2:padAction(button)
@@ -710,6 +720,9 @@ function Game3:_padPressedBody(joystick, button)
       return
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
+      return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
       return
     end
   end
@@ -853,6 +866,9 @@ function Game3:joystickpressed(joystick, button)
       return
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
+      return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
       return
     end
   end

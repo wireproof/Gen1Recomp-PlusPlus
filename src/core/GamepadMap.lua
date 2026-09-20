@@ -19,7 +19,13 @@ GamepadMap.TRIGGER_OFF = 0.2
 
 GamepadMap.DEFAULT_PAD_ACTIONS = {
   rightshoulder = "speedUp", righttrigger = "speedUp",
-  leftshoulder = "speedDown", lefttrigger = "speedDown",
+  -- A backwards step from NORMAL used to wrap to 200X, making the left
+  -- shoulder look like a fast-forward switch that could not be turned off.
+  -- Give handhelds an unambiguous escape hatch instead: L toggles the active
+  -- speed category between NORMAL and 2X.  SELECT+L is still intercepted as
+  -- display chord 7 before this action runs.  FRLG keeps physical shoulders
+  -- as GBA L/R and uses the corresponding trigger for this speed action.
+  leftshoulder = "speedToggle", lefttrigger = "speedToggle",
   -- FRLG: shoulders also drive l/r via Input dual-emit (see Input:gamepadpressed).
 }
 

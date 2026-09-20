@@ -57,7 +57,7 @@ local STICK_OFF = 0.3
 -- "select".  Both roads reach SELECT; the one road that did not was Gold's,
 -- where src/core/Game2.lua used to answer `back` with love.event.quit().
 
-Input.PAD_ACTIONS = { speedUp = true, speedDown = true }
+Input.PAD_ACTIONS = { speedUp = true, speedDown = true, speedToggle = true }
 
 local HAT_DIRECTIONS = {
   u = { "up" }, d = { "down" }, l = { "left" }, r = { "right" },

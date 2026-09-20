@@ -807,6 +807,14 @@ function Game:_cycleSpeed(dir)
   self:writeOptions()
 end
 
+function Game:_toggleSpeed()
+  if not (self.save and self.save.options) then return end
+  local GameSpeed = require("src.core.GameSpeed")
+  local key = GameSpeed.optionKey(Game.speedCategoryInStack(self.stack))
+  self.save.options[key] = GameSpeed.toggle(self.save.options[key])
+  self:writeOptions()
+end
+
 -- RFC 0020: input.key fires before ANY of this method's own logic runs --
 -- including the top-of-stack capture two lines down, which is itself an
 -- engine-owned "first refusal" system (BindingsMenu et al). This mirrors
@@ -977,6 +985,9 @@ local function padPressedBody(self, joystick, button)
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
       return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
+      return
     end
   end
   if selectHeld then
@@ -1068,6 +1079,9 @@ function Game:joystickpressed(joystick, button)
       return
     elseif action == "speedDown" then
       self:_cycleSpeed(-1)
+      return
+    elseif action == "speedToggle" then
+      self:_toggleSpeed()
       return
     end
   end

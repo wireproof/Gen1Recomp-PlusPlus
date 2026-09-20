@@ -218,6 +218,9 @@ do
   eq(#GameSpeed.allowed(), #GameSpeed.LEVELS,
     "leaving the cart restores the full ladder")
   eq(GameSpeed.cycle(4, 1), 10, "and cycling reaches the levels again")
+  eq(GameSpeed.toggle(1), 2, "toggle enters predictable 2X fast-forward")
+  eq(GameSpeed.toggle(2), 1, "toggle returns 2X straight to NORMAL")
+  eq(GameSpeed.toggle(200), 1, "toggle returns even extreme speed to NORMAL")
 end
 
 T.finish("game_speed_categories")

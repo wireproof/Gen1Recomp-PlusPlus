@@ -127,18 +127,18 @@ for _, btn in ipairs({ "a", "b", "y", "x" }) do
   check(not wroteOptions, "edge: no options write without Select for " .. btn)
 end
 
--- leftshoulder alone cycles speed (does not forward / does not digit).
+-- leftshoulder alone toggles fast-forward (does not forward / does not digit).
 do
   local sped = 0
-  local origCycle = Game._cycleSpeed
-  function Game:_cycleSpeed(dir) sped = sped + (dir or 0) end
+  local origToggle = Game._toggleSpeed
+  function Game:_toggleSpeed() sped = sped + 1 end
   Input:init()
   resetSpies()
   Game:gamepadpressed(joy, "leftshoulder")
   eq(#digits, 0, "edge: L alone does not fire display digit")
   eq(#padForwarded, 0, "edge: L alone does not forward to Input (speed hotkey)")
-  eq(sped, -1, "edge: L alone cycles GAME SPEED down")
-  Game._cycleSpeed = origCycle
+  eq(sped, 1, "edge: L alone toggles GAME SPEED")
+  Game._toggleSpeed = origToggle
 end
 
 -- Select+L still wins over the speed hotkey.
@@ -146,13 +146,13 @@ holdSelect()
 resetSpies()
 do
   local sped = 0
-  local origCycle = Game._cycleSpeed
-  function Game:_cycleSpeed(dir) sped = sped + (dir or 0) end
+  local origToggle = Game._toggleSpeed
+  function Game:_toggleSpeed() sped = sped + 1 end
   Game:gamepadpressed(joy, "leftshoulder")
   eq(digits[1], "7", "Select+L still fires display digit 7")
-  eq(sped, 0, "Select+L does not cycle GAME SPEED")
+  eq(sped, 0, "Select+L does not toggle GAME SPEED")
   eq(#padForwarded, 0, "Select+L does not forward L to Input")
-  Game._cycleSpeed = origCycle
+  Game._toggleSpeed = origToggle
 end
 
 -- Edge: Select alone (no face) does not synthesize a digit

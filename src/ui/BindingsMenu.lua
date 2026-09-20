@@ -25,7 +25,7 @@ local BUTTONS = {
   { id = "b", label = "B", key = "x", pad = "b" },
   { id = "start", label = "START", key = "escape", pad = "start" },
   { id = "select", label = "SELECT", key = "tab", pad = "back" },
-  { id = "speedDown", label = "SPEED -", pad = "leftshoulder", action = true },
+  { id = "speedToggle", label = "SPEED", pad = "leftshoulder", action = true },
   { id = "speedUp", label = "SPEED +", pad = "rightshoulder", action = true },
 }
 

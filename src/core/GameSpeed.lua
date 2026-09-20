@@ -78,6 +78,23 @@ function GameSpeed.cycle(v, dir)
   return levels[nextIdx]
 end
 
+-- A controller-friendly fast-forward switch.  Any accelerated value returns
+-- straight to NORMAL; NORMAL selects the first available accelerated level
+-- (normally 2X).  Unlike cycle(v, -1), this can never wrap 1X to 200X.
+function GameSpeed.toggle(v)
+  local levels = GameSpeed.allowed()
+  local normalIdx = 1
+  for i, level in ipairs(levels) do
+    if level == GameSpeed.DEFAULT then normalIdx = i break end
+  end
+  local normal = levels[normalIdx] or GameSpeed.DEFAULT
+  if GameSpeed.clamp(v) ~= normal then return normal end
+  for i = normalIdx + 1, #levels do
+    if levels[i] > normal then return levels[i] end
+  end
+  return normal
+end
+
 -- Per-category speed (RFC 0007): overworld walking, battle turns and menu
 -- navigation each cycle their own multiplier instead of one global "speed"
 -- value. This list is the single source of truth for which categories
