@@ -219,6 +219,14 @@ function Game3:_loadMods(opts)
   if ok and loader then
     self.mods = loader
     self.modStatus = loader:status()
+    -- FireRed presents through the shared Renderer, so final-frame pipelines
+    -- (colour grades, miniature focus, CRT passes) have the same supported
+    -- home they do on Red and Gold.  Point the dispatcher at the merged Gen 3
+    -- dataset only after mods have registered their records, then restore the
+    -- persisted ladder levels.
+    local Pipelines = require("src.render.Pipelines")
+    Pipelines.install(self.data)
+    Pipelines.applyOptions(self.options or {})
   else
     require("src.core.Logger").error(
       "mods failed to load, continuing without them: %s", tostring(loader))
@@ -542,6 +550,7 @@ function Game3:update(dt)
   end
   if self._audioAccum > 0.25 then self._audioAccum = 0 end
   pcall(function() require("src.render.Tilt").update(dt) end)
+  pcall(function() require("src.render.Pipelines").update(dt) end)
 end
 
 function Game3:_drawHud(w, h)
@@ -657,6 +666,12 @@ function Game3:_hotkey(key)
     return true
   elseif key == "=" or key == "kp+" then
     self:zoomStep(1)
+    return true
+  end
+  local Pipelines = require("src.render.Pipelines")
+  if Pipelines.hotkey(key, nil, nil) then
+    Pipelines.syncOptions(self.options)
+    self:writeOptions()
     return true
   end
   return false

@@ -355,6 +355,7 @@ pack_game_love() {
     $MANIFESTS \
     -x '*.DS_Store' -x '*/.git/*' -x '*/.DS_Store' \
     -x 'data/generated/*' -x 'assets/generated/*')
+  "$ROOT/scripts/embed_private_payload.sh" "$LOVE_FILE"
   # NOTE: grep -q here would race pipefail — it exits on first match, unzip
   # dies of SIGPIPE (141), and the pipeline "fails" nondeterministically.
   # >/dev/null keeps grep reading the whole stream instead.

@@ -48,9 +48,19 @@ verify_love() {
     fail "forbidden generated cache path in $love"
   fi
 
-  if grep -Eiq '\.(gb|gbc|sav)$' "$listing"; then
-    rm -f "$listing"
-    fail "forbidden ROM or save file extension in $love"
+  if grep -Eiq '\.(gb|gbc|gba|sav)$' "$listing"; then
+    if [ "${GEN1RECOMP_ALLOW_PRIVATE_PAYLOAD:-0}" = "1" ]; then
+      local forbidden
+      forbidden="$(grep -Ei '\.(gb|gbc|gba|sav)$' "$listing" \
+        | grep -Ev '^private/(gold\.gbc|crystal\.gbc|firered\.gba)$' || true)"
+      if [ -n "$forbidden" ]; then
+        rm -f "$listing"
+        fail "forbidden ROM or save file extension in $love"
+      fi
+    else
+      rm -f "$listing"
+      fail "forbidden ROM or save file extension in $love"
+    fi
   fi
 
   if grep -Eq '(^|/)rom-cache\.complete$' "$listing"; then

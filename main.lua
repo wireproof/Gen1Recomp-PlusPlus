@@ -736,25 +736,45 @@ function love.load(args)
     return
   end
 
-  -- A private package can carry its owner's verified FireRed backup at this
-  -- path.  Public builds never contain it.  Import it on the first launch and
-  -- boot FireRed directly thereafter; an explicit launcher deep-link still
-  -- reaches the normal multi-game launcher.
-  local bundledFireRed = "private/firered.gba"
-  if not resolvedLaunch.launcher and love.filesystem.getInfo(bundledFireRed) then
-    if RomImporter.isReady("firered") then
-      bootGame("firered")
-      return
+  -- Private packages may carry the owner's verified backups. Public builds
+  -- never contain these paths. Import every bundled game once, in sequence;
+  -- a multi-game package lands on the launcher so the player can choose,
+  -- while the original FireRed-only private package keeps its direct boot.
+  local bundled = {}
+  for _, row in ipairs({
+    { version = "gold", path = "private/gold.gbc", name = "Pokemon Gold" },
+    { version = "crystal", path = "private/crystal.gbc", name = "Pokemon Crystal" },
+    { version = "firered", path = "private/firered.gba", name = "Pokemon FireRed" },
+  }) do
+    if love.filesystem.getInfo(row.path) then bundled[#bundled + 1] = row end
+  end
+  if not resolvedLaunch.launcher and #bundled > 0 then
+    local function finishedBundledImports()
+      Importer = nil
+      if #bundled == 1 then
+        bootGame(bundled[1].version)
+      else
+        showLauncher("firered")
+      end
     end
-    local okBundled, bundledData = pcall(love.filesystem.read, bundledFireRed)
-    if okBundled and type(bundledData) == "string" then
-      Importer = RomImporter.new(function(version)
+    local function importBundled(index)
+      while bundled[index] and RomImporter.isReady(bundled[index].version) do
+        index = index + 1
+      end
+      local row = bundled[index]
+      if not row then return finishedBundledImports() end
+      local okBundled, bundledData = pcall(love.filesystem.read, row.path)
+      if not okBundled or type(bundledData) ~= "string" then
+        return importBundled(index + 1)
+      end
+      Importer = RomImporter.new(function()
         Importer = nil
-        bootGame(version or "firered")
+        importBundled(index + 1)
       end)
-      Importer:startData(bundledData, "Bundled Pokemon FireRed")
-      return
+      Importer:startData(bundledData, "Bundled " .. row.name)
     end
+    importBundled(1)
+    return
   end
 
   -- The launcher draws before any game boots, so the mod loader has not run

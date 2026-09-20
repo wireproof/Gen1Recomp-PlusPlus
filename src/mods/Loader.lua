@@ -113,9 +113,10 @@ local GEN1_ONLY_MODULES = {
   -- only (src/mods/Builtins.lua:100), so every Gen 1 built-in in this table
   -- resolves here and then runs as nothing.
   ["src.script.Commands"] = true,
-  -- Loads fine under Gold and paints Red's chrome over Gold's options screen,
-  -- whose layout is one 18x16 box rather than four 20x4 ones.
-  ["src.ui.OptionRows"] = true,
+  -- OptionRows is deliberately absent: it is a stateless drawing/layout
+  -- utility also used by mod-owned screens, so requiring it does not patch a
+  -- dead Gen 1 runtime owner. A mod that chooses its four-box visual style on
+  -- Gold or FireRed may safely use it.
   ["src.ui.PartyMenu"] = true,
   ["src.ui.BoxMenu"] = true,
   ["src.ui.StartMenu"] = true,

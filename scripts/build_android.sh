@@ -54,7 +54,6 @@ VERSION=""
 PACKAGE_ONLY=false
 RELEASE=false
 TEST_APPLICATION_ID=""
-BUNDLED_ROM="${GEN1RECOMP_BUNDLED_ROM:-}"
 
 say()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mwarn:\033[0m %s\n' "$*" >&2; }
@@ -467,19 +466,7 @@ pack_game_love() {
     tools/rom_manifest_firered.json \
     -x '*.DS_Store' -x '*/.git/*' -x '*/.DS_Store' \
     -x 'data/generated/*' -x 'assets/generated/*')
-  if [ -n "$BUNDLED_ROM" ]; then
-    [ -f "$BUNDLED_ROM" ] || fail "bundled ROM not found: $BUNDLED_ROM"
-    local bundled_sha1 bundle_dir
-    bundled_sha1="$(shasum -a 1 "$BUNDLED_ROM" | awk '{print $1}')"
-    [ "$bundled_sha1" = "41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc" ] \
-      || fail "bundled ROM is not the supported Pokemon FireRed 1.0 image"
-    bundle_dir="$(mktemp -d)"
-    mkdir -p "$bundle_dir/private"
-    cp "$BUNDLED_ROM" "$bundle_dir/private/firered.gba"
-    (cd "$bundle_dir" && zip -q -0 "$LOVE_FILE" private/firered.gba)
-    rm -rf "$bundle_dir"
-    say "included verified private FireRed backup"
-  fi
+  "$ROOT/scripts/embed_private_payload.sh" "$LOVE_FILE"
   # List once and match against the captured text: piping unzip straight into
   # grep under `set -o pipefail` SIGPIPEs unzip as soon as grep exits early,
   # and the pipeline's 141 outranks grep's own status.  For the generated-data
@@ -505,10 +492,6 @@ pack_game_love() {
     || fail "game.love is missing the Crystal ROM import manifest"
   grep -qx "$FIRERED_MANIFEST_RELATIVE" <<< "$archive_entries" \
     || fail "game.love is missing the FireRed ROM import manifest"
-  if [ -n "$BUNDLED_ROM" ]; then
-    grep -qx 'private/firered.gba' <<< "$archive_entries" \
-      || fail "game.love is missing the requested private FireRed backup"
-  fi
   # This gate exists because the launcher's UI toolkit once lived outside
   # src/ (libs/flexlove) and was added to scripts/build.sh's payload and to
   # no other packager, so Android and iOS built an APK/IPA whose launcher

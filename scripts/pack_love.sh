@@ -21,7 +21,6 @@ LISTING="$WORK/love-listing.txt"
 DRY_RUN=0
 BUILD_INFO=""
 VERSION=""
-BUNDLED_ROM="${GEN1RECOMP_BUNDLED_ROM:-}"
 
 say()  { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 fail() { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
@@ -62,21 +61,7 @@ if [ -f "$ROOT/mobile/ios/app-repo.json" ]; then
   (cd "$ROOT" && zip -q "$OUTPUT" mobile/ios/app-repo.json)
 fi
 
-# Private/local packages may carry the owner's verified FireRed backup.  The
-# source path is supplied at build time and is never copied into the checkout.
-# Public CI does not set this variable, so ordinary releases remain ROM-free.
-if [ -n "$BUNDLED_ROM" ]; then
-  [ -f "$BUNDLED_ROM" ] || fail "bundled ROM not found: $BUNDLED_ROM"
-  bundled_sha1="$(shasum -a 1 "$BUNDLED_ROM" | awk '{print $1}')"
-  [ "$bundled_sha1" = "41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc" ] \
-    || fail "bundled ROM is not the supported Pokemon FireRed 1.0 image"
-  bundle_dir="$(mktemp -d "$(dirname "$OUTPUT")/bundle-rom.XXXXXX")"
-  mkdir -p "$bundle_dir/private"
-  cp "$BUNDLED_ROM" "$bundle_dir/private/firered.gba"
-  (cd "$bundle_dir" && zip -q -0 "$OUTPUT_ABS" private/firered.gba)
-  rm -rf "$bundle_dir"
-  say "included verified private FireRed backup"
-fi
+"$ROOT/scripts/embed_private_payload.sh" "$OUTPUT_ABS"
 
 if [ -n "$BUILD_INFO" ]; then
   [ -f "$BUILD_INFO" ] || fail "missing build-info: $BUILD_INFO"
@@ -108,10 +93,6 @@ unzip -Z1 "$OUTPUT" > "$LISTING"
 if grep -Eq '^(data|assets)/generated/[^/]+|^(data|assets)/generated/.+/' "$LISTING"; then
   fail "game.love unexpectedly contains generated ROM data"
 fi
-if [ -n "$BUNDLED_ROM" ]; then
-  grep -qxF "private/firered.gba" "$LISTING" \
-    || fail "game.love is missing the requested private FireRed backup"
-fi
 
 for required in tools/save-editor/App.lua tools/save-editor/Kit.lua \
                 tools/save-editor/PadInput.lua \
@@ -132,7 +113,12 @@ if [ -n "$BUILD_INFO" ]; then
     || fail "game.love is missing build-info.json"
 fi
 
-"$ROOT/scripts/switch/verify_payload.sh" "$OUTPUT"
+if [ -n "${GEN1RECOMP_BUNDLED_ROM:-}${GEN1RECOMP_BUNDLED_GOLD_ROM:-}${GEN1RECOMP_BUNDLED_CRYSTAL_ROM:-}${GEN1RECOMP_BUNDLED_FIRERED_ROM:-}" ]; then
+  GEN1RECOMP_ALLOW_PRIVATE_PAYLOAD=1 \
+    "$ROOT/scripts/switch/verify_payload.sh" "$OUTPUT"
+else
+  "$ROOT/scripts/switch/verify_payload.sh" "$OUTPUT"
+fi
 
 say "game.love: $(du -h "$OUTPUT" | cut -f1)"
 
