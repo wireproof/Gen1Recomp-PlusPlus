@@ -15,12 +15,28 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 fail() { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
-if [ ! -f "$ROOT/data/generated/maps.lua" ] \
-    && [ ! -f "$ROOT/blue/data/generated/maps.lua" ] \
-    && [ ! -f "$ROOT/yellow/data/generated/maps.lua" ] \
-    && [ ! -f "$ROOT/gold/data/generated/maps.lua" ] \
-    && [ ! -f "$ROOT/silver/data/generated/maps.lua" ] \
-    && [ ! -f "$ROOT/crystal/data/generated/maps.lua" ]; then
+have_game_data() {
+  for generated in \
+    "$ROOT/data/generated/maps.lua" \
+    "$ROOT/blue/data/generated/maps.lua" \
+    "$ROOT/yellow/data/generated/maps.lua" \
+    "$ROOT/gold/data/generated/maps.lua" \
+    "$ROOT/silver/data/generated/maps.lua" \
+    "$ROOT/crystal/data/generated/maps.lua"; do
+    [ -f "$generated" ] && return 0
+  done
+
+  local identity="${POKEPORT_IDENTITY:-pokemon-love2d}"
+  local marker
+  for marker in \
+    "$HOME/Library/Application Support/LOVE/$identity"/*/rom-cache.complete \
+    "$HOME/.local/share/love/$identity"/*/rom-cache.complete; do
+    [ -f "$marker" ] && return 0
+  done
+  return 1
+}
+
+if ! have_game_data; then
   fail "generated data missing,  run scripts/setup.sh first"
 fi
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Pokémon Red (LÖVE2D) - double-click launcher for macOS.
+# Gen1Recomp (LÖVE2D) - double-click launcher for macOS.
 #
 # First run: decodes a user-provided .gb file, installs anything missing,
 # builds the game data, then launches.
@@ -24,7 +24,7 @@ ask() { # ask "question" -> yes by default
   case "$a" in n|N|no|NO) return 1 ;; *) return 0 ;; esac
 }
 
-printf '\n  \033[1mPokémon Red - LÖVE2D port\033[0m\n\n'
+printf '\n  \033[1mGen1Recomp++ - LÖVE2D port\033[0m\n\n'
 
 have_love() {
   command -v love >/dev/null 2>&1 && return 0
@@ -33,10 +33,22 @@ have_love() {
   return 1
 }
 
+have_game_data() {
+  [ -f data/generated/maps.lua ] && return 0
+  local identity="${POKEPORT_IDENTITY:-pokemon-love2d}"
+  local marker
+  for marker in \
+    "$HOME/Library/Application Support/LOVE/$identity"/*/rom-cache.complete \
+    "$HOME/.local/share/love/$identity"/*/rom-cache.complete; do
+    [ -f "$marker" ] && return 0
+  done
+  return 1
+}
+
 # ---------------------------------------------------------------- fast path
-if [ -f data/generated/maps.lua ] && have_love; then
+if have_game_data && have_love; then
   say "already set up, launching the game"
-  scripts/run.sh || { err "the game failed to start"; pause_exit 1; }
+  scripts/run.sh "$@" || { err "the game failed to start"; pause_exit 1; }
   exit 0
 fi
 
@@ -80,5 +92,5 @@ scripts/setup.sh \
   || { err "setup failed - see the messages above"; pause_exit 1; }
 
 say "setup done, launching the game"
-scripts/run.sh || { err "the game failed to start"; pause_exit 1; }
+scripts/run.sh "$@" || { err "the game failed to start"; pause_exit 1; }
 exit 0
