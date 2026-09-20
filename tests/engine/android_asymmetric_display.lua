@@ -26,8 +26,10 @@ check(java:find("SECONDARY_TARGET_HANDHELD", 1, true)
   "routing hints retain a safe available-display fallback")
 check(java:find("dualScreenDisplayMode != %-1")
     and java:find("AYN_SECOND_SCREEN", 1, true)
+    and java:find("aynCompanion", 1, true)
+    and java:find("if (aynCompanion != null) external = aynCompanion", 1, true)
     and java:find("dualScreenModeObserverRegistered", 1, true),
-  "the optional AYN state is guarded and lifecycle-bound")
+  "the optional AYN state is guarded, lifecycle-bound, and prefers Screen-2")
 check(java:find("activity.dispatchKeyEvent", 1, true)
     and java:find("activity.dispatchGenericMotionEvent", 1, true),
   "companion windows forward controller input to the game Activity")

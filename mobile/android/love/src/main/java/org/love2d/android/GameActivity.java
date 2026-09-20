@@ -2574,6 +2574,7 @@ public class GameActivity extends SDLActivity {
         Display handheld = dm.getDisplay(Display.DEFAULT_DISPLAY);
         boolean handheldAvailable = android.os.Build.VERSION.SDK_INT >= 29
             && gameDisplayId != Display.DEFAULT_DISPLAY && isDisplayUsable(handheld);
+        Display aynCompanion = null;
         Display external = null;
         Display[] presentations = dm.getDisplays(
             android.hardware.display.DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
@@ -2584,9 +2585,15 @@ public class GameActivity extends SDLActivity {
                 Log.d("GameActivity", "display id=" + d.getDisplayId()
                     + " name=" + d.getName() + " size=" + size.x + "x" + size.y);
             }
-            if (external == null && d.getDisplayId() != gameDisplayId
-                    && isDisplayUsable(d)) external = d;
+            if (d.getDisplayId() != gameDisplayId && isDisplayUsable(d)) {
+                if (AYN_SECOND_SCREEN.equals(d.getName())) aynCompanion = d;
+                else if (external == null) external = d;
+            }
         }
+        // Screen-2 is the Thor's lower built-in panel. It also advertises as a
+        // presentation display, just like HDMI/DisplayPort outputs, so prefer
+        // its stable name instead of depending on DisplayManager array order.
+        if (aynCompanion != null) external = aynCompanion;
         if (secondaryTarget == SECONDARY_TARGET_HANDHELD && handheldAvailable) return handheld;
         if (secondaryTarget == SECONDARY_TARGET_EXTERNAL && external != null) return external;
         return handheldAvailable ? handheld : external;
