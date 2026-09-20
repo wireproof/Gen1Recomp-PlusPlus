@@ -67,6 +67,8 @@ add_rom GEN1RECOMP_BUNDLED_SILVER_ROM private/silver.gbc \
   49b163f7e57702bc939d642a18f591de55d92dae
 add_rom GEN1RECOMP_BUNDLED_FIRERED_ROM private/firered.gba \
   41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc
+add_rom GEN1RECOMP_BUNDLED_STADIUM_ROM baseroms/baserom.z64 \
+  ed7bef5a306f88c0a6e96b15e71fee2ef32058f3
 add_mod GEN1RECOMP_BUNDLED_GEAR_MOD mods/kanto_johto_gear
 add_mod GEN1RECOMP_BUNDLED_DRAMATIC_MOD mods/DRAMATIC_SHAPE
 
