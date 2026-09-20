@@ -52,7 +52,7 @@ verify_love() {
     if [ "${GEN1RECOMP_ALLOW_PRIVATE_PAYLOAD:-0}" = "1" ]; then
       local forbidden
       forbidden="$(grep -Ei '\.(gb|gbc|gba|sav)$' "$listing" \
-        | grep -Ev '^private/(gold\.gbc|crystal\.gbc|firered\.gba)$' || true)"
+        | grep -Ev '^private/(red\.gb|blue\.gb|yellow\.gb|gold\.gbc|silver\.gbc|crystal\.gbc|firered\.gba)$' || true)"
       if [ -n "$forbidden" ]; then
         rm -f "$listing"
         fail "forbidden ROM or save file extension in $love"

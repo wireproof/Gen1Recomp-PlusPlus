@@ -742,7 +742,11 @@ function love.load(args)
   -- while the original FireRed-only private package keeps its direct boot.
   local bundled = {}
   for _, row in ipairs({
+    { version = "red", path = "private/red.gb", name = "Pokemon Red" },
+    { version = "blue", path = "private/blue.gb", name = "Pokemon Blue" },
+    { version = "yellow", path = "private/yellow.gb", name = "Pokemon Yellow" },
     { version = "gold", path = "private/gold.gbc", name = "Pokemon Gold" },
+    { version = "silver", path = "private/silver.gbc", name = "Pokemon Silver" },
     { version = "crystal", path = "private/crystal.gbc", name = "Pokemon Crystal" },
     { version = "firered", path = "private/firered.gba", name = "Pokemon FireRed" },
   }) do
